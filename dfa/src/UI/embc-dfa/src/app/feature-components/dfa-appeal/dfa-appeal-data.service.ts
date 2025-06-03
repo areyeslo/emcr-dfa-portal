@@ -59,6 +59,10 @@ export class DFAAppealDataService {
     return this._caseDetails;
   }
 
+  clearCaseDetails() {
+    this._caseDetails = null;
+  }
+
   public createAppealDTO(): DfaAppeal {
     return {
       id: this._applicationId,

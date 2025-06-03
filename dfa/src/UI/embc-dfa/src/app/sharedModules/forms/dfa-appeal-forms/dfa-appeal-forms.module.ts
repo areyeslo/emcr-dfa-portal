@@ -8,15 +8,13 @@ import { MatInputModule } from '@angular/material/input';
 
 
 import { CoreModule } from 'src/app/core/core.module';
-import CaseDetailsComponent from '../../components/case-details/case-details.component';
 import AppealReasonComponent from './appeal-reason/appeal-reason.component';
 import SignAndSubmitComponent from './sign-and-submit/sign-and-submit.component';
 
 @NgModule({
   declarations: [
     AppealReasonComponent,
-    SignAndSubmitComponent,
-    CaseDetailsComponent,
+    SignAndSubmitComponent
   ],
   imports: [
     CommonModule,
