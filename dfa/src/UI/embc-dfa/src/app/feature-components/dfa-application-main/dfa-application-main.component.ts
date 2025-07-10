@@ -510,7 +510,9 @@ export class DFAApplicationMainComponent
           default:
             break;
         }
-        this.form$.unsubscribe();
+       if (this.form$) {
+          this.form$.unsubscribe();
+        }
         stepper.next();
         this.form.markAllAsTouched();
       },
