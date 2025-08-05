@@ -166,6 +166,7 @@ namespace EMBC.Database.Model
 			public const string DFA_DateUploaded = "dfa_dateuploaded";
 			public const string DFA_Description = "dfa_description";
 			public const string DFA_DFA_Appeal_BcGoV_DocumentUrl_AppealId = "dfa_dfa_appeal_bcgov_documenturl_AppealId";
+			public const string DFA_DFA_ClaimAppeal_BcGoV_DocumentUrl_ClaimAppeal = "dfa_dfa_claimappeal_bcgov_documenturl_ClaimAppeal";
 			public const string DFA_DFA_Project_BcGoV_DocumentUrl_Project = "dfa_dfa_project_bcgov_documenturl_Project";
 			public const string DFA_DFA_ProjectClaim_BcGoV_DocumentUrl_RecoveryClaim = "dfa_dfa_projectclaim_bcgov_documenturl_RecoveryClaim";
 			public const string DFA_ErrorMessage = "dfa_errormessage";
@@ -1757,6 +1758,25 @@ namespace EMBC.Database.Model
 			set
 			{
 				this.SetRelatedEntity<EMBC.Database.Model.DFA_Appeal>("dfa_dfa_appeal_bcgov_documenturl_AppealId", null, value);
+			}
+		}
+		
+		/// <summary>
+		/// N:1 dfa_dfa_claimappeal_bcgov_documenturl_ClaimAppeal
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("dfa_claimappeal")]
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("dfa_dfa_claimappeal_bcgov_documenturl_ClaimAppeal")]
+		public EMBC.Database.Model.DFA_ClaimAppeal DFA_DFA_ClaimAppeal_BcGoV_DocumentUrl_ClaimAppeal
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntity<EMBC.Database.Model.DFA_ClaimAppeal>("dfa_dfa_claimappeal_bcgov_documenturl_ClaimAppeal", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.SetRelatedEntity<EMBC.Database.Model.DFA_ClaimAppeal>("dfa_dfa_claimappeal_bcgov_documenturl_ClaimAppeal", null, value);
 			}
 		}
 		

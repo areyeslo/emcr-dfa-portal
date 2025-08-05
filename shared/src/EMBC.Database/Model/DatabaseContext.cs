@@ -73,6 +73,17 @@ namespace EMBC.Database.Model
 		}
 		
 		/// <summary>
+		/// Gets a binding to the set of all <see cref="EMBC.Database.Model.DFA_ClaimAppeal"/> entities.
+		/// </summary>
+		public System.Linq.IQueryable<EMBC.Database.Model.DFA_ClaimAppeal> DFA_ClaimAppealSet
+		{
+			get
+			{
+				return this.CreateQuery<EMBC.Database.Model.DFA_ClaimAppeal>();
+			}
+		}
+		
+		/// <summary>
 		/// Gets a binding to the set of all <see cref="EMBC.Database.Model.DFA_ClientCode"/> entities.
 		/// </summary>
 		public System.Linq.IQueryable<EMBC.Database.Model.DFA_ClientCode> DFA_ClientCodeSet

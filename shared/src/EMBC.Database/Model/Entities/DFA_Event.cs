@@ -111,6 +111,7 @@ namespace EMBC.Database.Model
 			public const string DFA_DateOfEventDeclaredRevised2 = "dfa_dateofeventdeclaredrevised2";
 			public const string DFA_DeadlineDate = "dfa_deadlinedate";
 			public const string DFA_Description = "dfa_description";
+			public const string DFA_DFA_Event_DFA_ClaimAppeal_Event = "DFA_DFA_Event_DFA_ClaimAppeal_Event";
 			public const string DFA_DFAAuthNo = "dfa_dfaauthno";
 			public const string DFA_EndDate = "dfa_enddate";
 			public const string DFA_EventDateLegacy = "dfa_eventdatelegacy";
@@ -1282,6 +1283,24 @@ namespace EMBC.Database.Model
 			get
 			{
 				return this.GetAttributeValue<System.Nullable<long>>("versionnumber");
+			}
+		}
+		
+		/// <summary>
+		/// 1:N dfa_dfa_event_dfa_claimappeal_Event
+		/// </summary>
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("dfa_dfa_event_dfa_claimappeal_Event")]
+		public System.Collections.Generic.IEnumerable<EMBC.Database.Model.DFA_ClaimAppeal> DFA_DFA_Event_DFA_ClaimAppeal_Event
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntities<EMBC.Database.Model.DFA_ClaimAppeal>("dfa_dfa_event_dfa_claimappeal_Event", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.SetRelatedEntities<EMBC.Database.Model.DFA_ClaimAppeal>("dfa_dfa_event_dfa_claimappeal_Event", null, value);
 			}
 		}
 		
