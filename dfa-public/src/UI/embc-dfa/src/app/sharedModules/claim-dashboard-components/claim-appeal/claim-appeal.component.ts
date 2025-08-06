@@ -15,6 +15,10 @@ import InvoiceComponent from '../../forms/dfa-claim-main-forms/invoice/invoice.c
 import { FormsModule } from '@angular/forms';
 import { MatStepperModule } from '@angular/material/stepper';
 import { CancelConfirmationDialogComponent } from 'src/app/core/components/dialog-components/dfa-cancel-confirmation-dialog/dfa-cancel-confirmation-dialog.component';
+import { ClaimAppealService } from 'src/app/core/api/services/claim-appeal.service';
+import { SubmitClaimAppealRequest, InvoiceAppealRequest } from 'src/app/core/api/models';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
 
 type TableRow = 
   | { type: 'invoice'; data: InvoiceExtended }
@@ -23,7 +27,7 @@ type TableRow =
 @Component({
   selector: 'app-claim-appeal',
   standalone: true,
-  imports: [CoreModule, MatCardModule, MatTableModule, CommonModule, MatDialogModule, MatCheckboxModule, FixedCurrencyPipe, FormsModule, MatStepperModule ],
+  imports: [CoreModule, MatCardModule, MatTableModule, CommonModule, MatDialogModule, MatCheckboxModule, FixedCurrencyPipe, FormsModule, MatStepperModule],
   templateUrl: './claim-appeal.component.html',
   styleUrl: './claim-appeal.component.scss'
 })
@@ -40,7 +44,9 @@ export class ClaimAppealComponent implements OnInit {
     private route: ActivatedRoute,
     public dfaClaimMainDataService: DFAClaimMainDataService,
     private router: Router,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private claimAppealService: ClaimAppealService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -122,8 +128,8 @@ export class ClaimAppealComponent implements OnInit {
   }
 
   submitAppeal(): void {
-    const invalidRows = this.documentSummaryDataSource.data
-    .filter(row => this.selection.isSelected(row.data) && !row.data.appealReason?.trim());
+    // const invalidRows = this.documentSummaryDataSource.data
+    //   .filter(row => this.selection.isSelected(row.data) && !row.data.appealReason?.trim());
 
     const selectedInvoices = this.selection.selected;
 
@@ -131,8 +137,66 @@ export class ClaimAppealComponent implements OnInit {
 
     console.log('Submitting appeal for selected invoices:', selectedInvoices);
 
-    // call a service method to submit these
-    // this.appealService.submitAppeal(selectedInvoices).subscribe(...)
+    // Get the claim ID from the data service
+    const claimId = this.dfaClaimMainDataService.getClaimId();
+    
+    if (!claimId) {
+      console.error('No claim ID found');
+      this.snackBar.open('Error: No claim ID found. Please try again.', 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    // Map the selected invoices to the API request format
+    const invoiceAppeals: InvoiceAppealRequest[] = selectedInvoices.map(invoice => ({
+      invoiceId: invoice.invoiceId,
+      appealReason: invoice.appealReason || '',
+      appealAdjustment: invoice.appealAdjustment || null
+    }));
+
+    // Create the request object
+    const request: SubmitClaimAppealRequest = {
+      claimId: claimId,
+      selectedInvoices: invoiceAppeals
+    };
+
+    // Submit the appeal
+    this.claimAppealService.claimAppealSubmitClaimAppeal({ body: request }).subscribe({
+      next: (response) => {
+        console.log('Appeal submitted successfully:', response);
+        this.snackBar.open('Appeal submitted successfully!', 'Close', {
+          duration: 5000,
+          panelClass: ['success-snackbar']
+        });
+        // Navigate back to claim decision or show success message
+        this.router.navigate(['/app-claim-decision/' + claimId]);
+      },
+      error: (error) => {
+        console.error('Error submitting appeal:', error);
+        
+        // Handle specific error for existing appeal
+        if (error.error && typeof error.error === 'string' && 
+            error.error.includes('Existing claim appeal found')) {
+          this.snackBar.open('An appeal already exists for this claim. Only one appeal per claim is allowed.', 'Close', {
+            duration: 8000,
+            panelClass: ['error-snackbar']
+          });
+        } else if (error.status === 400 && error.error) {
+          // Handle other 400 errors with more specific messages
+          this.snackBar.open(`Error submitting appeal: ${error.error}`, 'Close', {
+            duration: 8000,
+            panelClass: ['error-snackbar']
+          });
+        } else {
+          this.snackBar.open('Error submitting appeal. Please try again.', 'Close', {
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          });
+        }
+      }
+    });
   }
 
   viewInvoiceRow(element, index): void {

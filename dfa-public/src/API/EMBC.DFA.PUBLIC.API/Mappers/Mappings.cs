@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using EMBC.Database.Contract;
+using EMBC.Database.Model;
+using EMBC.Database.Model.DTO;
 using EMBC.DFA.API.ConfigurationModule.Models.AuthModels;
 using EMBC.DFA.API.ConfigurationModule.Models.Dynamics;
 using EMBC.DFA.API.ConfigurationModule.Models.PDF;
@@ -1038,6 +1041,36 @@ namespace EMBC.DFA.API.Mappers
                 .ForMember(d => d.contactEmail, opts => opts.MapFrom(s => s.emailaddress))
                 .ForMember(d => d.individualFirstname, opts => opts.MapFrom(s => s.display_name))
                 ;
+
+            // Claim Appeal mappings for Public API
+            CreateMap<SubmitClaimAppealRequest, ClaimAppeal>()
+                .ForMember(d => d.ClaimId, opts => opts.MapFrom(s => Guid.Parse(s.ClaimId)))
+                .ForMember(d => d.AppealReason, opts => opts.MapFrom(s => $"Invoice-based appeal submitted for {s.SelectedInvoices.Count} invoice(s)"))
+                .ForMember(d => d.InvoiceAppealsJson, opts => opts.MapFrom(s => SerializeInvoiceAppeals(s.SelectedInvoices)))
+                .ForMember(d => d.CreatedOnPortal, opts => opts.MapFrom(s => true))
+                .ForMember(d => d.Id, opts => opts.Ignore())
+                .ForMember(d => d.AppealDecision, opts => opts.Ignore())
+                .ForMember(d => d.AppealDecisionDate, opts => opts.Ignore())
+                .ForMember(d => d.AppealRecommendation, opts => opts.Ignore())
+                .ForMember(d => d.AppealStatus, opts => opts.Ignore())
+                .ForMember(d => d.AppealAssignedToEmail, opts => opts.Ignore())
+                .ForMember(d => d.DateAppealReceived, opts => opts.Ignore());
+
+            CreateMap<ClaimAppeal, ClaimAppealResponse>()
+                .ForMember(d => d.AppealId, opts => opts.MapFrom(s => s.Id.ToString()))
+                .ForMember(d => d.Message, opts => opts.MapFrom(s => "Claim appeal submitted successfully."));
+        }
+
+        private static string SerializeInvoiceAppeals(List<InvoiceAppealRequest> invoices)
+        {
+            var invoiceAppeals = invoices.Select(invoice => new InvoiceAppealDto
+            {
+                InvoiceId = invoice.InvoiceId,
+                AppealReason = invoice.AppealReason,
+                AppealAdjustment = invoice.AppealAdjustment
+            });
+            
+            return System.Text.Json.JsonSerializer.Serialize(invoiceAppeals);
         }
 
         private bool CheckEligibilityForProjectSubmission(string? dfa_applicationcasebpfstages)

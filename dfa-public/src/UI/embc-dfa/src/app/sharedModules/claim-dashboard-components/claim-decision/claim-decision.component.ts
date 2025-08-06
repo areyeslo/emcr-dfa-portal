@@ -222,5 +222,6 @@ export class ClaimDecisionComponent implements OnInit {
 export interface InvoiceExtended extends Invoice {
   invoiceId?: string;
   appealReason?: string;
+  appealAdjustment?: number;
 }
 

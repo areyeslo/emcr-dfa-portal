@@ -6,6 +6,7 @@ export { FilesService } from './services/files.service';
 export { ApplicationService } from './services/application.service';
 export { AttachmentService } from './services/attachment.service';
 export { BCeIdLookupService } from './services/b-ce-id-lookup.service';
+export { ClaimAppealService } from './services/claim-appeal.service';
 export { ClaimService } from './services/claim.service';
 export { CleanUpLogItemService } from './services/clean-up-log-item.service';
 export { ConfigurationService } from './services/configuration.service';

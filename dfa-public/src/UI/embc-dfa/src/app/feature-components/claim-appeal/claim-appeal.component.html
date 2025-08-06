@@ -1,0 +1,171 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <mat-icon class="card-title-icon">gavel</mat-icon>
+          Claim Appeal
+        </h3>
+      </div>
+
+      <div class="card-body">
+        <!-- Loading Indicator -->
+        <div *ngIf="isLoading" class="text-center p-4">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p class="mt-2">Loading claim appeal information...</p>
+        </div>
+
+        <!-- Existing Appeals List -->
+        <div *ngIf="existingAppeals.length > 0 && !isLoading" class="mb-4">
+          <h4 class="mb-3">Previous Appeals</h4>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Date Submitted</th>
+                  <th>Status</th>
+                  <th>Decision</th>
+                  <th>Decision Date</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let appeal of existingAppeals">
+                  <td>{{ appeal.dateAppealReceived | date:'medium' }}</td>
+                  <td>
+                    <span class="badge" 
+                          [ngClass]="{
+                            'badge-warning': appeal.appealStatus?.toLowerCase() === 'active',
+                            'badge-secondary': appeal.appealStatus?.toLowerCase() === 'inactive'
+                          }">
+                      {{ formatAppealStatus(appeal.appealStatus) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge"
+                          [ngClass]="{
+                            'badge-success': appeal.appealDecision?.toLowerCase() === 'approved',
+                            'badge-danger': appeal.appealDecision?.toLowerCase() === 'declined',
+                            'badge-info': appeal.appealDecision?.toLowerCase() === 'partial',
+                            'badge-light': !appeal.appealDecision
+                          }">
+                      {{ formatAppealDecision(appeal.appealDecision) }}
+                    </span>
+                  </td>
+                  <td>{{ appeal.appealDecisionDate | date:'medium' }}</td>
+                  <td class="text-truncate" style="max-width: 200px;" 
+                      [title]="appeal.appealReason">
+                    {{ appeal.appealReason }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- New Appeal Form -->
+        <div *ngIf="!readOnly && !isLoading">
+          <h4 class="mb-3">Submit New Appeal</h4>
+          
+          <!-- Warning if active appeal exists -->
+          <div *ngIf="hasActiveAppeal()" class="alert alert-warning" role="alert">
+            <mat-icon class="me-2">warning</mat-icon>
+            You already have an active appeal under review. You cannot submit another appeal until the current one is resolved.
+          </div>
+
+          <form [formGroup]="claimAppealForm" (ngSubmit)="submitAppeal()" *ngIf="!hasActiveAppeal()">
+            <!-- Appeal Reason -->
+            <div class="row">
+              <div class="col-12 form-group">
+                <label for="appealReason" class="form-label required">
+                  Appeal Reason <span class="text-danger">*</span>
+                </label>
+                <textarea
+                  id="appealReason"
+                  formControlName="appealReason"
+                  class="form-control"
+                  rows="6"
+                  placeholder="Please provide a detailed explanation for your appeal, including any new information or circumstances that should be considered..."
+                  [class.is-invalid]="claimAppealForm.get('appealReason')?.invalid && claimAppealForm.get('appealReason')?.touched"
+                ></textarea>
+                
+                <!-- Character Count -->
+                <div class="form-text text-end">
+                  {{ getCharacterCount('appealReason') }}/2000 characters
+                </div>
+
+                <!-- Error Messages -->
+                <div
+                  *ngIf="claimAppealForm.get('appealReason')?.invalid && claimAppealForm.get('appealReason')?.touched"
+                  class="invalid-feedback"
+                >
+                  {{ getErrorMessage('appealReason') }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="alert alert-info" role="alert">
+              <mat-icon class="me-2">info</mat-icon>
+              <strong>Appeal Guidelines:</strong>
+              <ul class="mb-0 mt-2">
+                <li>Clearly explain why you believe the claim decision should be reconsidered</li>
+                <li>Include any new information or evidence that was not previously available</li>
+                <li>Reference specific items or amounts you are disputing</li>
+                <li>Be specific and provide as much detail as possible</li>
+              </ul>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <!-- Unsaved Changes Warning -->
+                    <small *ngIf="hasUnsavedChanges" class="text-warning">
+                      <mat-icon class="me-1" style="font-size: 16px; vertical-align: middle;">warning</mat-icon>
+                      You have unsaved changes
+                    </small>
+                  </div>
+                  <div>
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary me-2"
+                      (click)="claimAppealForm.reset()"
+                      [disabled]="isLoading"
+                    >
+                      Clear Form
+                    </button>
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      [disabled]="!canSubmitAppeal()"
+                    >
+                      <mat-icon *ngIf="isLoading" class="me-2">
+                        <mat-spinner diameter="16"></mat-spinner>
+                      </mat-icon>
+                      <mat-icon *ngIf="!isLoading" class="me-2">send</mat-icon>
+                      {{ isLoading ? 'Submitting...' : 'Submit Appeal' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Read-only message -->
+        <div *ngIf="readOnly && !isLoading" class="alert alert-info" role="alert">
+          <mat-icon class="me-2">info</mat-icon>
+          You are viewing this appeal information in read-only mode.
+        </div>
+
+        <!-- No appeals message -->
+        <div *ngIf="existingAppeals.length === 0 && !isLoading && readOnly" class="text-center p-4">
+          <mat-icon class="text-muted mb-2" style="font-size: 48px;">gavel</mat-icon>
+          <p class="text-muted">No appeals have been submitted for this claim.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
